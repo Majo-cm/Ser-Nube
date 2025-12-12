@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebComic</title>
+    <title></title>
     <style>
         * {
             margin: 0;
@@ -26,42 +26,23 @@
         /* Indicador de página ultra discreto */
         .page-indicator {
             position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: rgba(255, 255, 255, 0.7);
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.7rem;
+            bottom: 15px;
+            right: 15px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
             font-family: monospace;
             z-index: 100;
             pointer-events: none;
             transition: opacity 0.3s;
             opacity: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .page-indicator.show {
             opacity: 1;
-        }
-        
-        /* Instrucciones solo al inicio */
-        .start-hint {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: rgba(255, 255, 255, 0.7);
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 0.7rem;
-            z-index: 100;
-            pointer-events: none;
-            transition: opacity 1s;
-            opacity: 1;
-        }
-        
-        .start-hint.fade-out {
-            opacity: 0;
         }
         
         /* Mensaje si no hay imágenes */
@@ -74,14 +55,24 @@
             font-family: monospace;
             font-size: 0.9rem;
             text-align: center;
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 30px;
             border-radius: 5px;
             border: 1px solid #333;
+            max-width: 80vw;
+            line-height: 1.5;
+        }
+        
+        .no-images code {
+            background-color: #222;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #aaa;
+            font-size: 0.85rem;
         }
         
         /* Efecto de carga sutil */
-        .comic-page:not([src]) {
+        .comic-page.loading {
             background: linear-gradient(90deg, #111 0%, #222 50%, #111 100%);
             background-size: 200% 100%;
             animation: loading 1.5s infinite;
@@ -101,15 +92,26 @@
             user-select: none;
         }
         
-        /* Scroll suave */
+        /* Scroll suave opcional */
         html {
             scroll-behavior: smooth;
+        }
+        
+        /* Estilo para imágenes con error */
+        .comic-page.error {
+            background-color: #111;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+            font-size: 0.8rem;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
     <div class="page-indicator" id="pageIndicator">1</div>
-    <div class="start-hint" id="startHint">Desplázate ↓</div>
     
     <div id="comicContainer">
         <!-- Las imágenes se cargarán aquí automáticamente -->
@@ -121,6 +123,7 @@
         const totalPagesToCheck = 39; // Número máximo de páginas a verificar
         let detectedPages = [];
         let scrollTimeout = null;
+        let lastScrollPosition = 0;
         
         // Función para probar si una imagen existe
         async function checkImageExists(imageUrl) {
@@ -167,10 +170,10 @@
             if (detectedPages.length === 0) {
                 container.innerHTML = `
                     <div class="no-images">
-                        <p>No se encontraron imágenes</p>
-                        <p style="font-size: 0.7rem; margin-top: 10px; color: #444;">
-                            Sube imágenes numeradas (1.jpg, 2.jpg, etc.)<br>
-                            a la carpeta /images
+                        <p>No se encontraron imágenes en la carpeta <code>/images</code></p>
+                        <p style="margin-top: 15px; font-size: 0.8rem; color: #555;">
+                            Para comenzar, sube imágenes numeradas como:<br>
+                            <code>1.jpg</code>, <code>2.jpg</code>, <code>3.jpg</code>, etc.
                         </p>
                     </div>
                 `;
@@ -182,20 +185,19 @@
                 const img = document.createElement('img');
                 img.src = page.url;
                 img.alt = `Página ${page.number}`;
-                img.className = 'comic-page';
+                img.className = 'comic-page loading';
                 img.loading = 'lazy';
                 img.dataset.pageNumber = page.number;
                 
+                // Manejar carga exitosa
+                img.onload = function() {
+                    this.classList.remove('loading');
+                };
+                
                 // Manejar error de imagen
                 img.onerror = function() {
-                    this.style.backgroundColor = '#111';
-                    this.style.minHeight = '100vh';
-                    this.style.display = 'flex';
-                    this.style.alignItems = 'center';
-                    this.style.justifyContent = 'center';
-                    this.style.color = '#444';
-                    this.style.fontSize = '0.8rem';
-                    this.style.fontFamily = 'monospace';
+                    this.classList.remove('loading');
+                    this.classList.add('error');
                     this.textContent = `${page.filename}`;
                 };
                 
@@ -216,7 +218,7 @@
             let currentPage = 1;
             let maxVisiblePercentage = 0;
             
-            document.querySelectorAll('.comic-page').forEach((img) => {
+            document.querySelectorAll('.comic-page:not(.error)').forEach((img) => {
                 const rect = img.getBoundingClientRect();
                 const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
                 const visiblePercentage = (visibleHeight / windowHeight) * 100;
@@ -230,37 +232,44 @@
             indicator.textContent = currentPage;
             
             // Mostrar/ocultar indicador según scroll
-            if (scrollPosition > 50) {
+            if (scrollPosition > 100) {
                 indicator.classList.add('show');
-                
-                // Ocultar mensaje inicial
-                const startHint = document.getElementById('startHint');
-                startHint.classList.add('fade-out');
             } else {
                 indicator.classList.remove('show');
             }
+            
+            lastScrollPosition = scrollPosition;
         }
         
-        // Ocultar indicador temporalmente al detener scroll
+        // Ocultar indicador cuando no hay scroll reciente
         function handleScrollEnd() {
             const indicator = document.getElementById('pageIndicator');
-            indicator.classList.remove('show');
             
             if (scrollTimeout) clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
-                if (window.scrollY > 50) {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Mostrar indicador temporalmente al tocar
+        function handleTouchStart() {
+            const indicator = document.getElementById('pageIndicator');
+            indicator.classList.add('show');
+            
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (window.scrollY > 100) {
                     indicator.classList.add('show');
                 }
-            }, 1500);
+            }, 2000);
         }
         
         // Inicializar cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', async function() {
-            // Ocultar mensaje inicial después de 3 segundos
-            setTimeout(() => {
-                const startHint = document.getElementById('startHint');
-                startHint.classList.add('fade-out');
-            }, 3000);
+            // Quitar el título si está vacío
+            if (!document.title || document.title.trim() === '') {
+                document.title = 'WebComic';
+            }
             
             // Detectar y cargar páginas
             await detectAllPages();
@@ -271,38 +280,59 @@
             window.addEventListener('scroll', handleScrollEnd);
             window.addEventListener('resize', updatePageIndicator);
             
+            // Mostrar indicador al tocar en móviles
+            document.addEventListener('touchstart', handleTouchStart);
+            
             // Inicializar indicador
             setTimeout(updatePageIndicator, 100);
             
             // Mensaje en consola
             console.log(`WebComic: ${detectedPages.length} páginas detectadas`);
-            console.log(`Páginas: ${detectedPages.map(p => p.number).join(', ')}`);
-        });
-        
-        // Prevenir zoom en móviles con doble toque
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
+            if (detectedPages.length > 0) {
+                console.log(`Páginas disponibles: ${detectedPages.map(p => p.number).join(', ')}`);
             }
-            lastTouchEnd = now;
-        }, false);
+        });
         
         // Navegación con teclado
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+            const indicator = document.getElementById('pageIndicator');
+            
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') {
                 window.scrollBy(0, window.innerHeight * 0.9);
+                indicator.classList.add('show');
                 e.preventDefault();
-            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
                 window.scrollBy(0, -window.innerHeight * 0.9);
+                indicator.classList.add('show');
                 e.preventDefault();
             } else if (e.key === 'Home') {
                 window.scrollTo(0, 0);
+                indicator.classList.remove('show');
                 e.preventDefault();
             } else if (e.key === 'End') {
                 window.scrollTo(0, document.body.scrollHeight);
+                indicator.classList.add('show');
                 e.preventDefault();
+            } else if (e.key === ' ') {
+                // Barra espaciadora para bajar
+                if (!e.shiftKey) {
+                    window.scrollBy(0, window.innerHeight * 0.9);
+                    indicator.classList.add('show');
+                    e.preventDefault();
+                }
+            }
+        });
+        
+        // Mostrar indicador temporalmente con clic
+        document.addEventListener('click', function() {
+            const indicator = document.getElementById('pageIndicator');
+            if (window.scrollY > 100) {
+                indicator.classList.add('show');
+                
+                if (scrollTimeout) clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 1500);
             }
         });
     </script>
