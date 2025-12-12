@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple WebComic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: #0a0a0a;
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: #ff6b6b;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: #aaa;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .comic-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .comic-page {
+            width: 100%;
+            display: block;
+            margin: 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .comic-info {
+            padding: 1rem;
+            text-align: center;
+            background-color: #222;
+            border-top: 1px solid #333;
+        }
+        
+        .page-number {
+            font-weight: bold;
+            color: #ff6b6b;
+            font-size: 1.1rem;
+        }
+        
+        .page-title {
+            margin-top: 0.5rem;
+            font-size: 1.3rem;
+        }
+        
+        .page-date {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: #0a0a0a;
+            color: #888;
+            border-top: 2px solid #333;
+            margin-top: 2rem;
+        }
+        
+        .upload-instructions {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #222;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .upload-instructions h2 {
+            margin-bottom: 1rem;
+            color: #ff6b6b;
+        }
+        
+        .upload-instructions ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-instructions li {
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            background-color: #333;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #ffcc66;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .upload-instructions {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            header {
+                padding: 1rem;
+            }
+            
+            .page-title {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Simple WebComic</h1>
+        <p class="subtitle">Un webcomic minimalista donde cada imagen ocupa el ancho completo de la pantalla. Desplázate hacia abajo para ver todas las páginas consecutivamente.</p>
+    </header>
+    
+    <main>
+        <div class="comic-container" id="comicContainer">
+            <!-- Las páginas del cómic se cargarán aquí dinámicamente -->
+            <!-- Para agregar nuevas páginas, simplemente añade más elementos con clase "comic-page" -->
+        </div>
+        
+        <div class="upload-instructions">
+            <h2>Cómo subir nuevas páginas del cómic</h2>
+            <p>Para agregar nuevas páginas a este webcomic, sigue estos pasos:</p>
+            <ol>
+                <li>Renombra tus imágenes de cómic de forma consecutiva: <code>page1.jpg</code>, <code>page2.jpg</code>, etc.</li>
+                <li>Sube las imágenes a la carpeta <code>/images</code> en tu repositorio de GitHub.</li>
+                <li>Actualiza el array <code>comicPages</code> en el código JavaScript con los nombres de tus nuevas imágenes.</li>
+                <li>¡Listo! Las nuevas páginas aparecerán automáticamente en el sitio.</li>
+            </ol>
+            <p><strong>Nota:</strong> Las imágenes deben tener una relación de aspecto adecuada para verse bien en todos los dispositivos.</p>
+        </div>
+    </main>
+    
+    <footer>
+        <p>Simple WebComic &copy; <span id="currentYear"></span> | Creado para GitHub Pages</p>
+        <p>Las imágenes se muestran a todo ancho sin espaciado entre ellas.</p>
+    </footer>
+    
+    <script>
+        // Datos del cómic - Añade aquí las nuevas páginas
+        const comicPages = [
+            {
+                filename: "page1.jpg",
+                title: "El Comienzo",
+                date: "15 de marzo, 2023"
+            },
+            {
+                filename: "page2.jpg", 
+                title: "El Encuentro",
+                date: "22 de marzo, 2023"
+            },
+            {
+                filename: "page3.jpg",
+                title: "La Decisión",
+                date: "29 de marzo, 2023"
+            },
+            {
+                filename: "page4.jpg",
+                title: "Nuevos Horizontes",
+                date: "5 de abril, 2023"
+            },
+            {
+                filename: "page5.jpg",
+                title: "El Desafío",
+                date: "12 de abril, 2023"
+            },
+            {
+                filename: "page6.jpg",
+                title: "Revelaciones",
+                date: "19 de abril, 2023"
+            }
+        ];
+        
+        // Configuración
+        const imagesFolder = "images"; // Carpeta donde están las imágenes
+        
+        // Cargar las páginas del cómic
+        function loadComicPages() {
+            const container = document.getElementById('comicContainer');
+            
+            comicPages.forEach((page, index) => {
+                // Crear contenedor para cada página
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'page-container';
+                
+                // Crear elemento de imagen
+                const img = document.createElement('img');
+                img.src = `${imagesFolder}/${page.filename}`;
+                img.alt = `${page.title} - Página ${index + 1}`;
+                img.className = 'comic-page';
+                img.loading = 'lazy'; // Carga diferida para mejor rendimiento
+                
+                // Crear información de la página
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'comic-info';
+                infoDiv.innerHTML = `
+                    <div class="page-number">Página ${index + 1} de ${comicPages.length}</div>
+                    <div class="page-title">${page.title}</div>
+                    <div class="page-date">Publicado: ${page.date}</div>
+                `;
+                
+                // Añadir al contenedor
+                pageContainer.appendChild(img);
+                pageContainer.appendChild(infoDiv);
+                container.appendChild(pageContainer);
+            });
+        }
+        
+        // Manejar errores de carga de imágenes
+        function handleImageError(img) {
+            console.error(`Error al cargar la imagen: ${img.src}`);
+            
+            // Crear un mensaje de error visual
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                width: 100%;
+                height: 400px;
+                background-color: #333;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                color: #ff6b6b;
+                text-align: center;
+                padding: 2rem;
+                border-bottom: 1px solid #444;
+            `;
+            errorDiv.innerHTML = `
+                <h3>Error al cargar la imagen</h3>
+                <p>No se pudo cargar: ${img.alt}</p>
+                <p>Asegúrate de que el archivo existe en la carpeta <code>${imagesFolder}</code></p>
+            `;
+            
+            // Reemplazar la imagen con el mensaje de error
+            img.parentNode.replaceChild(errorDiv, img);
+        }
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Establecer el año actual en el footer
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            // Cargar las páginas del cómic
+            loadComicPages();
+            
+            // Agregar manejadores de error para las imágenes
+            document.querySelectorAll('.comic-page').forEach(img => {
+                img.addEventListener('error', function() {
+                    handleImageError(this);
+                });
+            });
+            
+            // Mostrar mensaje de consola
+            console.log(`WebComic cargado con ${comicPages.length} páginas.`);
+            console.log("Para agregar más páginas, actualiza el array 'comicPages' en el código JavaScript.");
+        });
+        
+        // Manejar el evento de error para imágenes cargadas dinámicamente
+        document.addEventListener('error', function(e) {
+            if (e.target.tagName === 'IMG' && e.target.classList.contains('comic-page')) {
+                handleImageError(e.target);
+            }
+        }, true);
+    </script>
+</body>
+</html>
